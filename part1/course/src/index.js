@@ -1,17 +1,60 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
+import React, { useState } from 'react'
+import ReactDOM from 'react-dom'
+
+const Display = ({ counter }) => <div>{counter}</div>
+
+const Button = ({ name, clickHandler }) => (
+  <button onClick={clickHandler}>
+    {name}
+  </button>
+)
+
+const History = (props) => {
+  if (props.allClicks.length === 0) {
+    return (
+      <div>
+        The app is used by pressing the buttons.
+      </div>
+    )
+  }
+  else {
+    return (
+      <div>
+        Button press history: {props.allClicks.join(', ')}
+      </div>
+    )
+  }
+}
+
+const App = () => {
+  const [left, setLeft] = useState(0)
+  const [right, setRight] = useState(0)
+  const [allClicks, setAll] = useState([])
+
+  const HandleLeftClick = () => {
+    setAll(allClicks.concat('L'))
+    setLeft(left + 1)
+  }
+
+  const HandleRightClick = () => {
+    setAll(allClicks.concat('R'))
+    setRight(right + 1)
+  }
+
+  return (
+    <div>
+      <div>
+        {left}
+        <Button name='left' clickHandler={HandleLeftClick} />
+        <Button name='right' clickHandler={HandleRightClick} />
+        {right}
+        <History allClicks={allClicks} />
+      </div>
+    </div>
+  )
+}
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  <App />, 
   document.getElementById('root')
-);
-
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
+)
