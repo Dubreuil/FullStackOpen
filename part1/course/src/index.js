@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import ReactDOM from 'react-dom'
 
-const Display = ({ counter }) => <div>{counter}</div>
+const Display = props => <div>{props.value}</div>
 
 const Button = ({ name, clickHandler }) => (
   <button onClick={clickHandler}>
