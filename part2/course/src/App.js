@@ -13,7 +13,7 @@ const App = () => {
       .get('http://localhost:3001/notes')
       .then(response => {
         setNotes(response.data)
-    })
+      })
   }, [])
 
   const addNote = (event) => {
