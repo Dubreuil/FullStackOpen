@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
-import Persons from './components/Persons'
+import Person from './components/Person'
 
-import axios from 'axios'
+import personService from './services/persons'
 
 const App = () => {
   const [ persons, setPersons ] = useState([])
@@ -13,24 +13,57 @@ const App = () => {
   const [ personsToDisplay, setPersonsToDisplay ] = useState(persons)
 
   useEffect(() => {
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        setPersons(response.data)
+    personService
+      .getAll()
+      .then(initialPersons => {
+        setPersons(initialPersons)
       })
   }, [])
 
   const addPerson = (event) => {
     event.preventDefault()
 
-    if (persons.filter(person => {return person.name === newName}).length > 0) {
-        alert(`${newName} is aleady in the phonebook`)
-        return
+    const person = persons.find(p => p.name === newName)
+
+    if (person !== undefined) {
+        if (window.confirm(`${newName} is aleady in the phonebook, do you want to update their phone number?`)) {
+          
+          const changedPerson = { ...person, number:newNumber }
+          
+          personService
+            .update(person.id, changedPerson)
+            .then(updatedPerson => {
+              setPersons(persons.map(p => p.id !== updatedPerson.id ? p : updatedPerson))
+            })
+        }
     }
 
-    setPersons(persons.concat({name:newName, number:newNumber}))
+    else {
+      const personObject = {name:newName, number:newNumber}
+      
+      personService
+        .create(personObject)
+        .then(createdPerson => {
+          setPersons(persons.concat(createdPerson))
+        })
+    }
+
     setNewName('')
     setNewNumber('')
+  }
+
+  const removePerson = id => {
+    if (window.confirm("Really delete this user?")) {
+      personService
+        .remove(id)
+        .then(() => {
+          personService
+            .getAll()
+            .then(persons => {
+            setPersons(persons)
+          })
+        })
+    }
   }
 
   const handleNameChange = (event) => setNewName(event.target.value)
@@ -55,7 +88,10 @@ const App = () => {
       <PersonForm newName={newName} newNumber={newNumber} submitHandler={addPerson} handleNameChange={handleNameChange} handleNumberChange={handleNumberChange} />
       <h2>Numbers</h2>
       <div>
-        <Persons persons={personsToDisplay} />
+        {personsToDisplay.map(person => {
+          return (<Person key={person.name} person={person} deleteHandler={() => removePerson(person.id) } />)
+          })
+        }
       </div>
     </div>
   )
