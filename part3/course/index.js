@@ -1,6 +1,9 @@
 const express = require('express')
 const app = express()
 
+app.use(express.json())
+app.use(requestLogger)
+
 let notes = [
     {
         id: 1,
@@ -21,6 +24,14 @@ let notes = [
         important: true
     }
 ]
+
+const requestLogger = (req, res, next) => {
+    console.log('Method:', req.method)
+    console.log('Path:', req.path)
+    console.log('Body:', req.body)
+    console.log('---')
+    next()
+}
 
 const generateId = () => {
     const maxId = notes.length > 0 ? Math.max(...notes.map(n => n.id)) : 0
