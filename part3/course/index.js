@@ -1,7 +1,23 @@
 const express = require('express')
+const cors = require('cors')
+
 const app = express()
 
+app.use(cors())
 app.use(express.json())
+
+const requestLogger = (req, res, next) => {
+    console.log('Method:', req.method)
+    console.log('Path:', req.path)
+    console.log('Body:', req.body)
+    console.log('---')
+    next()
+}
+
+const unkownEndpoint = (req, res) => {
+    res.status(404).send({ error: 'Unknown endpoint' })
+}
+
 app.use(requestLogger)
 
 let notes = [
@@ -25,27 +41,18 @@ let notes = [
     }
 ]
 
-const requestLogger = (req, res, next) => {
-    console.log('Method:', req.method)
-    console.log('Path:', req.path)
-    console.log('Body:', req.body)
-    console.log('---')
-    next()
-}
-
 const generateId = () => {
     const maxId = notes.length > 0 ? Math.max(...notes.map(n => n.id)) : 0
     
     return maxId + 1
 }
 
-app.get('/', (req, res) => {
-    res.send('<h1>Hello World</h1>')
+app.get('/api/notes', (req, res) => {
+    console.log("get1")
+    res.json(notes)
 })
 
 app.get('/api/notes/:id', (req, res) => {
-    console.log("get2")
-
     const id = Number(req.params.id)
     const note = notes.find(note => note.id === id)
 
@@ -84,11 +91,6 @@ app.post('/api/notes', (req, res) => {
     res.json(note)
 })
 
-app.get('/api/notes', (req, res) => {
-    console.log("get1")
-    res.json(notes)
-})
-
-const PORT = 3000
+const PORT = 3001
 app.listen(PORT)
 console.log(`Server running on port ${PORT}`)
